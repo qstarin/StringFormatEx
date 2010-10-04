@@ -41,8 +41,12 @@
   <ItemGroup>
     <Compile Include="Formatter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="staging\CustomFormat.cs" />
     <Compile Include="staging\CustomFormatInfo.cs" />
+    <Compile Include="staging\CustomFormatPriority.cs" />
+    <Compile Include="staging\CustomFormatPriorityAttribute.cs" />
     <Compile Include="staging\ICustomSourceInfo.cs" />
+    <Compile Include="staging\PlaceholderInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
