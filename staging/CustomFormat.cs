@@ -9,45 +9,45 @@ using System.Text;
 
 
 
-public sealed class _CustomFormat
+public sealed partial class _CustomFormat
 {
 
 
     #region Shared Fields
 
-    // '' <summary>
-    // '' The character that escapes other characters
-    // '' </summary>
+    /// <summary>
+    /// The character that escapes other characters
+    /// </summary>
     public static char escapeCharacter = '\\';
     
-    // '' <summary>
-    // '' A string that contains all the special escape characters.
-    // '' The order of these characters matches the order of the escapeText.
-    // '' </summary>
+    /// <summary>
+    /// A string that contains all the special escape characters.
+    /// The order of these characters matches the order of the escapeText.
+    /// </summary>
     public static string escapeCharacters = "nt{}\\";
     
-    public static string[] escapeText;
+    public static string[] escapeText = new string[] { "\r\n", "\t", "{", "}", "\\" };
     
-    // '' <summary>
-    // '' A string containing Selector split characters.
-    // '' Any of these characters chain together properties.
-    // '' For example, {Person.Address.City}.
-    // '' 
-    // '' Two things to notice:
-    // '' Multiple splitters in a row are ignored;
-    // '' Parenthesis/brackets do NOT have to be matched, and they do NOT affect order of operations.
-    // '' 
-    // '' Therefore, the following examples are identical:
-    // ''  {Person.Address.City} 
-    // ''  {Person)Address]City}
-    // ''  {[Person]Address(City)}
-    // ''  {..Person...Address...City..}
-    // ''  {..Person(Address)]]]City)[)..}
-    // '' 
-    // '' This allows comfortable syntaxes such as {Array[0].Item}
-    // '' This syntax is identical to {Array.0.Item} and {Array]0]Item} and {[Array][0](Item)}
-    // '' 
-    // '' </summary>
+    /// <summary>
+    /// A string containing Selector split characters.
+    /// Any of these characters chain together properties.
+    /// For example, {Person.Address.City}.
+    /// 
+    /// Two things to notice:
+    /// Multiple splitters in a row are ignored;
+    /// Parenthesis/brackets do NOT have to be matched, and they do NOT affect order of operations.
+    /// 
+    /// Therefore, the following examples are identical:
+    ///  {Person.Address.City} 
+    ///  {Person)Address]City}
+    ///  {[Person]Address(City)}
+    ///  {..Person...Address...City..}
+    ///  {..Person(Address)]]]City)[)..}
+    /// 
+    /// This allows comfortable syntaxes such as {Array[0].Item}
+    /// This syntax is identical to {Array.0.Item} and {Array]0]Item} and {[Array][0](Item)}
+    /// 
+    /// </summary>
     public static string selectorSplitters = ".[]()";
     
     public static string selectorCharacters = "_";
@@ -57,11 +57,11 @@ public sealed class _CustomFormat
 
     #region CustomFormat overloads
 
-    // '' <summary>
-    // '' Formats the format string using the parameters provided.
-    // '' </summary>
-    // '' <param name="format"></param>
-    // '' <param name="args"></param>
+    /// <summary>
+    /// Formats the format string using the parameters provided.
+    /// </summary>
+    /// <param name="format"></param>
+    /// <param name="args"></param>
     public static string CustomFormat(string format, params object[] args) {
         StringWriter output = new StringWriter(new StringBuilder((format.Length * 2)));
         //  Guessing a length can help performance a little.
@@ -69,17 +69,17 @@ public sealed class _CustomFormat
         return output.ToString();
     }
     
-    // '' <summary>
-    // '' Performs the CustomFormat and outputs to a Stream.
-    // '' </summary>
+    /// <summary>
+    /// Performs the CustomFormat and outputs to a Stream.
+    /// </summary>
     public static void CustomFormat(Stream output, string format, params object[] args) {
         CustomFormat(new CustomFormatInfo(new StreamWriter(output), format, args));
     }
     
-    // '' <summary>
-    // '' Performs the CustomFormat and outputs to a TextWriter.
-    // '' </summary>
-    // '' <param name="output">Common types of TextWriters are StringWriter and StreamWriter.</param>
+    /// <summary>
+    /// Performs the CustomFormat and outputs to a TextWriter.
+    /// </summary>
+    /// <param name="output">Common types of TextWriters are StringWriter and StreamWriter.</param>
     public static void CustomFormat(TextWriter output, string format, params object[] args) {
         CustomFormat(new CustomFormatInfo(output, format, args));
     }
@@ -89,9 +89,9 @@ public sealed class _CustomFormat
     
     #region CustomFormat
     
-    // '' <summary>
-    // '' Does the actual work.
-    // '' </summary>
+    /// <summary>
+    /// Does the actual work.
+    /// </summary>
     [EditorBrowsable(EditorBrowsableState.Advanced)]
     public static void CustomFormat(CustomFormatInfo info) {
         if (info.Current == null && info.Arguments.Length >= 1) {
@@ -166,14 +166,14 @@ public sealed class _CustomFormat
 
     #region NextPlaceholder
 
-    // '' <summary>
-    // '' Returns True if the placeholder was formatted correctly; False if a placeholder couldn't be found.
-    // '' Outputs all relevant placeholder information.
-    // '' 
-    // '' This function takes the place of the Regular Expression.
-    // '' It is faster and more direct, and does not suffer from Regex endless loops.
-    // '' In tests, this nearly doubles the speed vs Regex.
-    // '' </summary>
+    /// <summary>
+    /// Returns True if the placeholder was formatted correctly; False if a placeholder couldn't be found.
+    /// Outputs all relevant placeholder information.
+    /// 
+    /// This function takes the place of the Regular Expression.
+    /// It is faster and more direct, and does not suffer from Regex endless loops.
+    /// In tests, this nearly doubles the speed vs Regex.
+    /// </summary>
     public static bool NextPlaceholder(string format, int startIndex, int endIndex, PlaceholderInfo placeholder) {
         placeholder = new PlaceholderInfo();
         placeholder.hasNested = false;
@@ -352,15 +352,15 @@ public sealed class _CustomFormat
 
     static private IDictionary<CustomFormatPriorities, IList<ExtendCustomFormatDelegate>> CustomFormatHandlers;
 
-    // '' <summary>
-    // '' An event that allows custom formatting to occur.
-    // '' 
-    // '' Why is it Custom?  2 reasons:
-    // '' " This event short-circuits if a handler sets the output, to improve efficiency and redundancy
-    // '' " This event allows you to set an "event priority" by applying the CustomFormatPriorityAttribute to the handler method!  (See "How to add your own Custom Formatter:" below)
-    // '' 
-    // '' This adds a little complexity to the event, but there are occassions when we need the CustomFormat handlers to execute in a certain order.
-    // '' </summary>
+    /// <summary>
+    /// An event that allows custom formatting to occur.
+    /// 
+    /// Why is it Custom?  2 reasons:
+    /// " This event short-circuits if a handler sets the output, to improve efficiency and redundancy
+    /// " This event allows you to set an "event priority" by applying the CustomFormatPriorityAttribute to the handler method!  (See "How to add your own Custom Formatter:" below)
+    /// 
+    /// This adds a little complexity to the event, but there are occassions when we need the CustomFormat handlers to execute in a certain order.
+    /// </summary>
     public static event ExtendCustomFormatDelegate ExtendCustomFormat
     {
         add
@@ -404,14 +404,14 @@ public sealed class _CustomFormat
 
     #region GetDefaultSource
 
-    // '' <summary>
-    // '' This is the Default method for evaluating the Source.
-    // '' 
-    // '' 
-    // '' If this is the first selector and the selector is an integer, then it returns the (global) indexed argument (just like String.Format).
-    // '' If the Current item is a Dictionary that contains the Selector, it returns the dictionary item.
-    // '' Otherwise, Reflection will be used to determine if the Selector is a Property, Field, or Method of the Current item.
-    // '' </summary>
+    /// <summary>
+    /// This is the Default method for evaluating the Source.
+    /// 
+    /// 
+    /// If this is the first selector and the selector is an integer, then it returns the (global) indexed argument (just like String.Format).
+    /// If the Current item is a Dictionary that contains the Selector, it returns the dictionary item.
+    /// Otherwise, Reflection will be used to determine if the Selector is a Property, Field, or Method of the Current item.
+    /// </summary>
     [CustomFormatPriority(CustomFormatPriorities.Low)]
     public static void _GetDefaultSource(ICustomSourceInfo info) { // TODO: Handles ExtendCustomSource
         //  If it wasn't handled, let's evaluate the source on our own:
@@ -472,7 +472,7 @@ public sealed class _CustomFormat
                     }
 
                     //  Make sure that this method is not a Sub!  It has to be a Function!
-                    if ((method.ReturnType == typeof(Void))) {
+                    if ((method.ReturnType == typeof(void))) {
                         continue;
                     }
 
@@ -487,12 +487,13 @@ public sealed class _CustomFormat
     #endregion
 
 
+    #region GetDefaultOutput
 
-    // '' <summary>
-    // '' This is the Default method for formatting the output.
-    // '' This code has been derived from the built-in String.Format() function.
-    // '' </summary>
-    public static void _GetDefaultOutput(CustomFormatInfo info) {
+    /// <summary>
+    /// This is the Default method for formatting the output.
+    /// This code has been derived from the built-in String.Format() function.
+    /// </summary>
+    public static void _GetDefaultOutput(CustomFormatInfo info) { // TODO: Handles ExtendCustomFormat
         //  Let's see if there are nested items:
         if (info.HasNested) {
             info.CustomFormatNested();
@@ -518,164 +519,155 @@ public sealed class _CustomFormat
         }
     }
 
+    #endregion
 
+
+    #region ErrorActions
 
     public enum ErrorActions { ThrowError, OutputErrorInResult, Ignore }
 
 #if DEBUG
     //  Makes it easier to spot errors while debugging.
-    // '' <summary>
-    // '' Determines what to do if a Format string cannot be successfully evaluated.
-    // '' </summary>
+    /// <summary>
+    /// Determines what to do if a Format string cannot be successfully evaluated.
+    /// </summary>
     public static ErrorActions InvalidSelectorAction = ErrorActions.ThrowError;
     public static ErrorActions InvalidFormatAction = ErrorActions.ThrowError;
 #else
-    // '' <summary>
-    // '' Determines what to do if a Format string cannot be successfully evaluated.
-    // '' </summary>
+    /// <summary>
+    /// Determines what to do if a Format string cannot be successfully evaluated.
+    /// </summary>
     public static ErrorActions InvalidSelectorAction = ErrorActions.OutputErrorInResult;
     public static ErrorActions InvalidFormatAction = ErrorActions.OutputErrorInResult;
 #endif
 
-} // end class
+    #endregion
 
 
+    #region OnInvalidSelector
+
+    /// <summary>
+    /// Determines what to do when an Invalid Selector is found.
+    /// 
+    /// Returns True if we should just continue; False if we should skip this item.
+    /// </summary>
+    private static bool OnInvalidSelector(string format, CustomFormatInfo info, PlaceholderInfo placeholder)
+    {
+        string invalidSelector = format.Substring(placeholder.selectorStart, placeholder.selectorLength);
+
+        string message;
+        switch (InvalidSelectorAction) {
+            case ErrorActions.ThrowError:
+                //  Let's give a detailed description of the error:
+                message = CustomFormat(
+                        ("Invalid Format String.\\n" +
+                         ("Could not evaluate \"{0}\": \"{1}\" is not a member of {2}.\\n" +
+                          ("The error occurs at position {3} of the following format string:\\n" + "{4}"))),
+                        invalidSelector, info.Selector, info.CurrentType, placeholder.placeholderStart, format);
+                throw new ArgumentException(message, invalidSelector);
+            case ErrorActions.OutputErrorInResult:
+                //  Let's put the placeholder back,
+                //  along with the error.
+                //  Example: {Person.Name.ABC}  becomes  {Person.Name.ABC:(Error: "ABC" is not a member of String)}
+                message = ("{" + (CustomFormat("{0}:(Error: \"{1}\" is not a member of {2})", invalidSelector,
+                                                info.Selector, info.CurrentType) + "}"));
+                info.WriteError(message, placeholder);
+                return false;
+            case ErrorActions.Ignore:
+                //  Allow formatting to continue!
+                break;
+        }
+        return true;
+    }
+
+    #endregion
 
 
+    #region OnInvalidFormat
+
+    /// <summary>
+    /// Determines what to do when an Invalid Selector is found.
+    /// </summary>
+    private static void OnInvalidFormat(string format, CustomFormatInfo info, PlaceholderInfo placeholder, Exception ex)
+    {
+        string selector = format.Substring(placeholder.selectorStart, placeholder.selectorLength);
+        string invalidFormat = format.Substring(placeholder.formatStart, placeholder.formatLength);
+        string errorMessage = ex.Message;
+
+        if (ex.GetType() is FormatException) {
+            errorMessage = CustomFormat("\"{0}\" is not a valid format specifier for {1}", invalidFormat,
+                                        info.CurrentType);
+        }
+
+        string message;
+        switch (InvalidFormatAction) {
+            case ErrorActions.ThrowError:
+                //  Let's give a detailed description of the error:
+                message = CustomFormat(
+                        ("Invalid Format String.\\n" +
+                         ("Could not evaluate {{0}} because {1}.\\n" +
+                          ("The error occurs at position {2} of the following format string:\\n" + "{3}"))), selector,
+                        errorMessage, placeholder.placeholderStart, format);
+                throw new ArgumentException(message, invalidFormat, ex);
+                break;
+            case ErrorActions.OutputErrorInResult:
+                //  Let's put the placeholder back,
+                //  along with the error.
+                //  Example: {Person.Birthday:x}  becomes  {Person.Birthday:(Error: "x" is an invalid format specifier)}
+                message = ("{" + (CustomFormat("{0}:(Error: {1})", selector, errorMessage) + "}"));
+                info.WriteError(message, placeholder);
+                break;
+            case ErrorActions.Ignore:
+                //  Allow formatting to continue!
+                break;
+        }
+    }
+
+    #endregion
 
 
+    #region SplitNested
 
+    /// <summary>
+    /// Enhances String.Split by ignoring any characters that are between the nested characters.
+    /// It also allows you to stop after a certain number of splits.
+    /// 
+    /// Example:
+    /// SplitNested("a|b{1|2|3}|c", "|"c) = {"a", "b{1|2|3}", "c"}
+    /// SplitNested("a|b{1|2|3}|c", "|"c, 2) = {"a", "b{1|2|3}|c"}
+    /// 
+    /// </summary>
+    protected static string[] SplitNested(string format, char splitChar)
+    {
+        return SplitNested(format, splitChar, 0);
+    }
 
+    protected static string[] SplitNested(string format, char splitChar, int maxItems)
+    {
+        int openCount = 0;
+        IList<string> items = new List<String>(4); //  (Estimating 4 matches)
+        int lastSplit = 0;
 
+        for (int i = 0; i < format.Length; i++) {
+            char c = format[i];
+            if (c == '{') {
+                openCount++;
+            } 
+            else if (c == '}') {
+                openCount--;
+            } 
+            else if (c == splitChar && openCount == 0) {
+                items.Add(format.Substring(lastSplit, (i - lastSplit)));
+                lastSplit = i + 1;
+                if (maxItems != 0 && items.Count == (maxItems - 1)) {
+                    break;
+                }
+            }
+        }
+        items.Add(format.Substring(lastSplit));
+        return items.ToArray();
+    }
 
+    #endregion
 
-
-
-
-//            // TODO: #End If ... Warning!!! not translated
-//            Enum;
-//            ErrorActions;
-//            // '' <summary>Throws an exception.  This is only recommended for debugging, so that formatting errors can be easily found.</summary>
-//            ThrowError;
-//            // '' <summary>Includes an error message in the output</summary>
-//            OutputErrorInResult;
-//            // '' <summary>Ignores errors and tries to output the data anyway</summary>
-//            Ignore;
-//            Enum;
-
-
-
-
-//            // TODO: #End Region ... Warning!!! not translated
-//            // TODO: #Region ... Warning!!! not translated
-//            // '' <summary>
-//            // '' Determines what to do when an Invalid Selector is found.
-//            // '' 
-//            // '' Returns True if we should just continue; False if we should skip this item.
-//            // '' </summary>
-//            ((bool)(OnInvalidSelector(format, ((CustomFormatInfo)(info)), ((PlaceholderInfo)(placeholder)))));
-//            object invalidSelector = format.Substring(placeholder.selectorStart, placeholder.selectorLength);
-//            switch (InvalidSelectorAction) {
-//                case ErrorActions.ThrowError:
-//                    //  Let's give a detailed description of the error:
-//                    object message = CustomFormat(("Invalid Format String.\\n" + ("Could not evaluate \"{0}\": \"{1}\" is not a member of {2}.\\n" + ("The error occurs at position {3} of the following format string:\\n" + "{4}"))), invalidSelector, info.Selector, info.CurrentType, placeholder.placeholderStart, format);
-//                    throw new ArgumentException(message, invalidSelector);
-//                    break;
-//                case ErrorActions.OutputErrorInResult:
-//                    //  Let's put the placeholder back,
-//                    //  along with the error.
-//                    //  Example: {Person.Name.ABC}  becomes  {Person.Name.ABC:(Error: "ABC" is not a member of String)}
-//                    object message = ("{" 
-//                                + (CustomFormat("{0}:(Error: \"{1}\" is not a member of {2})", invalidSelector, info.Selector, info.CurrentType) + "}"));
-//                    info.WriteError(message, placeholder);
-//                    return false;
-//                    break;
-//                case ErrorActions.Ignore:
-//                    //  Allow formatting to continue!
-//                    break;
-//            }
-//            return true;
-
-
-
-//            // '' <summary>
-//            // '' Determines what to do when an Invalid Selector is found.
-//            // '' </summary>
-//            OnInvalidFormat(format, ((CustomFormatInfo)(info)), ((PlaceholderInfo)(placeholder)), ((Exception)(ex)));
-//            object selector = format.Substring(placeholder.selectorStart, placeholder.selectorLength);
-//            object invalidFormat = format.Substring(placeholder.formatStart, placeholder.formatLength);
-//            object errorMessage = ex.Message;
-//            if ((ex.GetType() == FormatException)) {
-//                errorMessage = CustomFormat("\"{0}\" is not a valid format specifier for {1}", invalidFormat, info.CurrentType);
-//            }
-//            switch (InvalidFormatAction) {
-//                case ErrorActions.ThrowError:
-//                    //  Let's give a detailed description of the error:
-//                    object message = CustomFormat(("Invalid Format String.\\n" + ("Could not evaluate {{0}} because {1}.\\n" + ("The error occurs at position {2} of the following format string:\\n" + "{3}"))), selector, errorMessage, placeholder.placeholderStart, format);
-//                    throw new ArgumentException(message, invalidFormat, ex);
-//                    break;
-//                case ErrorActions.OutputErrorInResult:
-//                    //  Let's put the placeholder back,
-//                    //  along with the error.
-//                    //  Example: {Person.Birthday:x}  becomes  {Person.Birthday:(Error: "x" is an invalid format specifier)}
-//                    object message = ("{" 
-//                                + (CustomFormat("{0}:(Error: {1})", selector, errorMessage) + "}"));
-//                    info.WriteError(message, placeholder);
-//                    break;
-//                case ErrorActions.Ignore:
-//                    //  Allow formatting to continue!
-//                    break;
-//            }
-
-
-
-
-//            // TODO: #End Region ... Warning!!! not translated
-//            // TODO: #Region ... Warning!!! not translated
-//            // TODO: #End Region ... Warning!!! not translated
-//            // TODO: #Region ... Warning!!! not translated
-//            // '' <summary>
-//            // '' Enhances String.Split by ignoring any characters that are between the nested characters.
-//            // '' It also allows you to stop after a certain number of splits.
-//            // '' 
-//            // '' Example:
-//            // '' SplitNested("a|b{1|2|3}|c", "|"c) = {"a", "b{1|2|3}", "c"}
-//            // '' SplitNested("a|b{1|2|3}|c", "|"c, 2) = {"a", "b{1|2|3}|c"}
-//            // '' 
-//            // '' </summary>
-//            ((string[])(SplitNested(format, ((char)(splitChar)), Optional, maxItemsAsInteger=0)));
-//            object openCount;
-//            0;
-//            Generic.List items = new Generic.List(Of, String);
-//            4;
-//            //  (Estimating 4 matches)
-//            object lastSplit;
-//            0;
-//            for (int i = 0; (i 
-//                        <= (format.Length - 1)); i++) {
-//                char c = format[i];
-//                if ((c == "{")) {
-//                    c;
-//                    openCount++;
-//                }
-//                else if ((c == "}")) {
-//                    c;
-//                    openCount--;
-//                }
-//                else if (((c == splitChar) 
-//                            && (openCount == 0))) {
-//                    items.Add(format.Substring(lastSplit, (i - lastSplit)));
-//                    lastSplit = (i + 1);
-//                    if (((maxItems != 0) 
-//                                && (items.Count 
-//                                == (maxItems - 1)))) {
-//                        break;
-//                    }
-//                    items.Add(format.Substring(lastSplit));
-//                    return items.ToArray;
-//                }
-//                // TODO: #End Region ... Warning!!! not translated
-//            }
-//        }
-//    }
-//}
+}

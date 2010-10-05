@@ -53,10 +53,3 @@ public interface ICustomSourceInfo
 	/// </summary>
 	bool Handled { get; set; }
 }
-
-//=======================================================
-//Service provided by Telerik (www.telerik.com)
-//Conversion powered by NRefactory.
-//Twitter: @telerik, @toddanglin
-//Facebook: facebook.com/telerik
-//=======================================================
