@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Reflection;
 using System.Text;
 
 
@@ -399,6 +401,142 @@ public sealed class _CustomFormat
 
     #endregion
 
+
+    #region GetDefaultSource
+
+    // '' <summary>
+    // '' This is the Default method for evaluating the Source.
+    // '' 
+    // '' 
+    // '' If this is the first selector and the selector is an integer, then it returns the (global) indexed argument (just like String.Format).
+    // '' If the Current item is a Dictionary that contains the Selector, it returns the dictionary item.
+    // '' Otherwise, Reflection will be used to determine if the Selector is a Property, Field, or Method of the Current item.
+    // '' </summary>
+    [CustomFormatPriority(CustomFormatPriorities.Low)]
+    public static void _GetDefaultSource(ICustomSourceInfo info) { // TODO: Handles ExtendCustomSource
+        //  If it wasn't handled, let's evaluate the source on our own:
+        //  We will see if it's an argument index, dictionary key, or a property/field/method.
+        //  Maybe source is the global index of our arguments? 
+        int argIndex;
+        if (info.SelectorIndex == 0 && int.TryParse(info.Selector, out argIndex)) {
+            if (argIndex < info.Arguments.Length) {
+                info.Current = info.Arguments[argIndex];
+            }
+            else {
+                //  The index is out-of-range!
+            }
+            return;
+        }
+
+        //  Maybe source is a Dictionary?
+        if (info.Current is IDictionary && ((IDictionary)info.Current).Contains(info.Selector)) {
+            info.Current = ((IDictionary)info.Current)[info.Selector];
+            return;
+        }
+
+
+        // REFLECTION:
+        // Let's see if the argSelector is a Property/Field/Method:
+        var sourceType = info.Current.GetType();
+        MemberInfo[] members = sourceType.GetMember(info.Selector);
+        foreach (MemberInfo member in members) {
+            switch (member.MemberType) {
+                case MemberTypes.Field:
+                    //  Selector is a Field; retrieve the value:
+                    FieldInfo field = member as FieldInfo;
+                    info.Current = field.GetValue(info.Current);
+                    return;
+                case MemberTypes.Property:
+                case MemberTypes.Method:
+                    MethodInfo method;
+                    if (member.MemberType == MemberTypes.Property) {
+                        //  Selector is a Property
+                        PropertyInfo prop = member as PropertyInfo;
+                        //  Make sure the property is not WriteOnly:
+                        if (prop.CanRead) {
+                            method = prop.GetGetMethod();
+                        }
+                        else {
+                            continue;
+                        }
+                    }
+                    else {
+                        //  Selector is a Method
+                        method = member as MethodInfo;
+                    }
+
+                    //  Check that this method is valid -- it needs to be a Function (return a value) and has to be parameterless:
+                    //  We are only looking for a parameterless Property/Method:
+                    if ((method.GetParameters().Length > 0)) {
+                        continue;
+                    }
+
+                    //  Make sure that this method is not a Sub!  It has to be a Function!
+                    if ((method.ReturnType == typeof(Void))) {
+                        continue;
+                    }
+
+                    //  Retrieve the Property/Method value:
+                    info.Current = method.Invoke(info.Current, new object[0]);
+                    return;
+            }
+        }
+        //  If we haven't returned yet, then the item must be invalid.
+    }
+
+    #endregion
+
+
+
+    // '' <summary>
+    // '' This is the Default method for formatting the output.
+    // '' This code has been derived from the built-in String.Format() function.
+    // '' </summary>
+    public static void _GetDefaultOutput(CustomFormatInfo info) {
+        //  Let's see if there are nested items:
+        if (info.HasNested) {
+            info.CustomFormatNested();
+            return;
+        }
+        //  Let's do the default formatting:
+        //  We will try using IFormatProvider, IFormattable, and if all else fails, ToString.
+        //  (This code was adapted from the built-in String.Format code)
+        if (info.Provider != null) {
+            //  Use the provider to see if a CustomFormatter is available:
+            ICustomFormatter formatter = info.Provider.GetFormat(typeof(ICustomFormatter)) as ICustomFormatter;
+            if (formatter != null) {
+                info.Write(formatter.Format(info.Format, info.Current, info.Provider));
+                return;
+            }
+            //  Now try to format the object, using its own built-in formatting if possible:
+            if (info.Current.GetType() is IFormattable) {
+                info.Write(((IFormattable)info.Current).ToString(info.Format, info.Provider));
+            }
+            else {
+                info.Write(info.Current.ToString());
+            }
+        }
+    }
+
+
+
+    public enum ErrorActions { ThrowError, OutputErrorInResult, Ignore }
+
+#if DEBUG
+    //  Makes it easier to spot errors while debugging.
+    // '' <summary>
+    // '' Determines what to do if a Format string cannot be successfully evaluated.
+    // '' </summary>
+    public static ErrorActions InvalidSelectorAction = ErrorActions.ThrowError;
+    public static ErrorActions InvalidFormatAction = ErrorActions.ThrowError;
+#else
+    // '' <summary>
+    // '' Determines what to do if a Format string cannot be successfully evaluated.
+    // '' </summary>
+    public static ErrorActions InvalidSelectorAction = ErrorActions.OutputErrorInResult;
+    public static ErrorActions InvalidFormatAction = ErrorActions.OutputErrorInResult;
+#endif
+
 } // end class
 
 
@@ -406,134 +544,14 @@ public sealed class _CustomFormat
 
 
 
-//            // TODO: #End Region ... Warning!!! not translated
-//            // TODO: #Region ... Warning!!! not translated
-//            // TODO: #End Region ... Warning!!! not translated
-//            // TODO: #Region ... Warning!!! not translated
-//            // '' <summary>
-//            // '' This is the Default method for evaluating the Source.
-//            // '' 
-//            // '' 
-//            // '' If this is the first selector and the selector is an integer, then it returns the (global) indexed argument (just like String.Format).
-//            // '' If the Current item is a Dictionary that contains the Selector, it returns the dictionary item.
-//            // '' Otherwise, Reflection will be used to determine if the Selector is a Property, Field, or Method of the Current item.
-//            // '' </summary>
-//            _GetDefaultSource(((CustomSourceInfo)(info)));
-//            ExtendCustomSource;
-//            //  If it wasn't handled, let's evaluate the source on our own:
-//            //  We will see if it's an argument index, dictionary key, or a property/field/method.
-//            //  Maybe source is the global index of our arguments? 
-//            object argIndex;
-//            if (((info.SelectorIndex == 0) 
-//                        && int.TryParse(info.Selector, argIndex))) {
-//                if ((argIndex < info.Arguments.Length)) {
-//                    info.Current = info.Arguments[argIndex];
-//                }
-//                else {
-//                    //  The index is out-of-range!
-//                }
-//                return;
-//            }
-//            //  Maybe source is a Dictionary?
-//            info.Current;
-//            IDictionary;
-//            Contains(info.Selector);
-//            info.Current;
-//            IDictionary;
-//            info.Selector;
-//            return;
-//            ((Type)(sourceType)) = info.Current.GetType;
-//            MemberInfo[] members = sourceType.GetMember(info.Selector);
-//            foreach (MemberInfo member in members) {
-//                switch (member.MemberType) {
-//                    case MemberTypes.Field:
-//                        //  Selector is a Field; retrieve the value:
-//                        FieldInfo field = member;
-//                        info.Current = field.GetValue(info.Current);
-//                        return;
-//                        break;
-//                    case MemberTypes.Property:
-//                    case MemberTypes.Method:
-//                        MethodInfo method;
-//                        if ((member.MemberType == MemberTypes.Property)) {
-//                            //  Selector is a Property
-//                            PropertyInfo prop = member;
-//                            //  Make sure the property is not WriteOnly:
-//                            if (prop.CanRead) {
-//                                method = prop.GetGetMethod;
-//                            }
-//                            else {
-//                                // TODO: Continue For... Warning!!! not translated
-//                            }
-//                        }
-//                        else {
-//                            //  Selector is a Method
-//                            method = member;
-//                        }
-//                        //  Check that this method is valid -- it needs to be a Function (return a value) and has to be parameterless:
-//                        //  We are only looking for a parameterless Property/Method:
-//                        if ((method.GetParameters.Length > 0)) {
-//                            // TODO: Continue For... Warning!!! not translated
-//                        }
-//                        //  Make sure that this method is not a Sub!  It has to be a Function!
-//                        if ((method.ReturnType == typeof(Void))) {
-//                            // TODO: Continue For... Warning!!! not translated
-//                        }
-//                        //  Retrieve the Property/Method value:
-//                        info.Current = method.Invoke(info.Current, new object[0]);
-//                        return;
-//                        break;
-//                }
-//            }
-//            //  If we haven't returned yet, then the item must be invalid.
-//            // '' <summary>
-//            // '' This is the Default method for formatting the output.
-//            // '' This code has been derived from the built-in String.Format() function.
-//            // '' </summary>
-//            _GetDefaultOutput(((CustomFormatInfo)(info)));
-//            ExtendCustomFormat;
-//            //  Let's see if there are nested items:
-//            if (info.HasNested) {
-//                info.CustomFormatNested();
-//                return;
-//            }
-//            //  Let's do the default formatting:
-//            //  We will try using IFormatProvider, IFormattable, and if all else fails, ToString.
-//            //  (This code was adapted from the built-in String.Format code)
-//            if (info.Provider) {
-//                IsNot;
-//                null;
-//                //  Use the provider to see if a CustomFormatter is available:
-//                ICustomFormatter formatter = info.Provider.GetFormat(typeof(ICustomFormatter));
-//                if (formatter) {
-//                    IsNot;
-//                    null;
-//                    info.Write(formatter.Format(info.Format, info.Current, info.Provider));
-//                    return;
-//                }
-//                //  Now try to format the object, using its own built-in formatting if possible:
-//                if ((info.Current.GetType() == IFormattable)) {
-//                    info.Write(DirectCast, info.Current, IFormattable).ToString(info.Format, info.Provider);
-//                }
-//                else {
-//                    info.Write(info.Current.ToString);
-//                }
-//            }
-//            // TODO: #End Region ... Warning!!! not translated
-//            // TODO: #Region ... Warning!!! not translated
-//            //  Makes it easier to spot errors while debugging.
-//            // TODO: #If Then ... Warning!!! not translated
-//            // '' <summary>
-//            // '' Determines what to do if a Format string cannot be successfully evaluated.
-//            // '' </summary>
-//            ((ErrorActions)(InvalidSelectorAction)) = ErrorActions.ThrowError;
-//            ((ErrorActions)(InvalidFormatAction)) = ErrorActions.ThrowError;
-//            // TODO: # ... Warning!!! not translated
-//            // '' <summary>
-//            // '' Determines what to do if a Format string cannot be successfully evaluated.
-//            // '' </summary>
-//            ((ErrorActions)(InvalidSelectorAction)) = ErrorActions.OutputErrorInResult;
-//            ((ErrorActions)(InvalidFormatAction)) = ErrorActions.OutputErrorInResult;
+
+
+
+
+
+
+
+
 //            // TODO: #End If ... Warning!!! not translated
 //            Enum;
 //            ErrorActions;
@@ -544,6 +562,10 @@ public sealed class _CustomFormat
 //            // '' <summary>Ignores errors and tries to output the data anyway</summary>
 //            Ignore;
 //            Enum;
+
+
+
+
 //            // TODO: #End Region ... Warning!!! not translated
 //            // TODO: #Region ... Warning!!! not translated
 //            // '' <summary>
@@ -573,6 +595,9 @@ public sealed class _CustomFormat
 //                    break;
 //            }
 //            return true;
+
+
+
 //            // '' <summary>
 //            // '' Determines what to do when an Invalid Selector is found.
 //            // '' </summary>
@@ -601,6 +626,10 @@ public sealed class _CustomFormat
 //                    //  Allow formatting to continue!
 //                    break;
 //            }
+
+
+
+
 //            // TODO: #End Region ... Warning!!! not translated
 //            // TODO: #Region ... Warning!!! not translated
 //            // TODO: #End Region ... Warning!!! not translated
