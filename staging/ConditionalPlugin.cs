@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 partial class _CustomFormat
 {
 	[CustomFormatPriority(CustomFormatPriorities.High)]
-	public static void FormatConditional(CustomFormatInfo info) // TODO: Handles ExtendCustomFormat
+	public static void FormatConditional(CustomFormatInfo info)
 	{
 		// See if the format string contains un-nested "|":
 		string[] parameters = SplitNested(info.Format, '|');

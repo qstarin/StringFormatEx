@@ -11,7 +11,15 @@ using System.Text;
 
 public sealed partial class _CustomFormat
 {
+    static _CustomFormat()
+    {
+        _CustomFormat.ExtendCustomFormat += _CustomFormat._GetDefaultOutput;
+        _CustomFormat.ExtendCustomFormat += _CustomFormat.FormatConditional;
+        _CustomFormat.ExtendCustomFormat += _CustomFormat.Do_Array_Formatting;
 
+        _CustomFormat.ExtendCustomSource += _CustomFormat._GetDefaultSource;
+        _CustomFormat.ExtendCustomSource += _CustomFormat.Get_Array_Source;
+    }
 
     #region Shared Fields
 
@@ -113,14 +121,14 @@ public sealed partial class _CustomFormat
         int lastAppendedIndex = 0;
         PlaceholderInfo placeholder = null;
 
-        while (NextPlaceholder(format, lastAppendedIndex, format.Length, placeholder)) {
+        while (NextPlaceholder(format, lastAppendedIndex, format.Length, ref placeholder)) {
             //  Write the text in-between placeholders:
             info.WriteRegularText(format, lastAppendedIndex, (placeholder.placeholderStart - lastAppendedIndex));
             lastAppendedIndex = placeholder.placeholderStart + placeholder.placeholderLength;
 
             //  Evaluate the source by evaluating each argSelector:
             info.Current = current; //  Restore the current scope
-            bool isFirstSelector = true; // TODO: Remove this variable if it never gets used again
+            //bool isFirstSelector = true; // TODO: Remove this variable if it never gets used again
             int selectorIndex = -1;
 
             foreach (string selector in placeholder.selectors) {
@@ -133,7 +141,7 @@ public sealed partial class _CustomFormat
                 if (!info.Handled) {
                     break;
                 }
-                isFirstSelector = false;
+                //isFirstSelector = false;
             }
 
             //  Handle errors:
@@ -174,14 +182,14 @@ public sealed partial class _CustomFormat
     /// It is faster and more direct, and does not suffer from Regex endless loops.
     /// In tests, this nearly doubles the speed vs Regex.
     /// </summary>
-    public static bool NextPlaceholder(string format, int startIndex, int endIndex, PlaceholderInfo placeholder) {
+    public static bool NextPlaceholder(string format, int startIndex, int endIndex, ref PlaceholderInfo placeholder) {
         placeholder = new PlaceholderInfo();
         placeholder.hasNested = false;
         placeholder.placeholderStart = -1;
         placeholder.selectorLength = -1;
         IList<string> selectorSplitList = new List<string>();
 
-        int lastSplitIndex = 0; // TODO: Verify this default value is correct.
+        int lastSplitIndex = 0;
         int openCount = 0;
         // Dim endIndex% = format.Length
 
@@ -333,9 +341,9 @@ public sealed partial class _CustomFormat
 
     #region ExtendCustomFormat
 
-    public delegate void ExtendCustomFormatDelegate(ICustomSourceInfo info);
+    public delegate void ExtendCustomFormatDelegate(CustomFormatInfo info);
 
-    public static void OnExtendCustomFormat(ICustomSourceInfo info)
+    public static void OnExtendCustomFormat(CustomFormatInfo info)
     {
         if (CustomFormatHandlers != null) {
             foreach (var list in CustomFormatHandlers.Values) {
@@ -413,7 +421,8 @@ public sealed partial class _CustomFormat
     /// Otherwise, Reflection will be used to determine if the Selector is a Property, Field, or Method of the Current item.
     /// </summary>
     [CustomFormatPriority(CustomFormatPriorities.Low)]
-    public static void _GetDefaultSource(ICustomSourceInfo info) { // TODO: Handles ExtendCustomSource
+    public static void _GetDefaultSource(ICustomSourceInfo info) 
+    {
         //  If it wasn't handled, let's evaluate the source on our own:
         //  We will see if it's an argument index, dictionary key, or a property/field/method.
         //  Maybe source is the global index of our arguments? 
@@ -493,7 +502,8 @@ public sealed partial class _CustomFormat
     /// This is the Default method for formatting the output.
     /// This code has been derived from the built-in String.Format() function.
     /// </summary>
-    public static void _GetDefaultOutput(CustomFormatInfo info) { // TODO: Handles ExtendCustomFormat
+    [CustomFormatPriority(CustomFormatPriorities.Low)]
+    public static void _GetDefaultOutput(CustomFormatInfo info) {
         //  Let's see if there are nested items:
         if (info.HasNested) {
             info.CustomFormatNested();

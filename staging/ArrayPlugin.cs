@@ -15,7 +15,7 @@ partial class _CustomFormat
 	/// CustomFormat("{Dates.2.Year}", {#1/1/2000#, #12/31/2999#, #9/9/9999#}) = "9999"
 	/// The ".2" selector is used to reference Dates(2).
 	/// </summary>
-	private static void Get_Array_Source(ICustomSourceInfo info) // TODO: Handles ExtendCustomSource
+	private static void Get_Array_Source(ICustomSourceInfo info)
 	{
 		int itemIndex;
 		if (info.Current is IList && int.TryParse(info.Selector, out itemIndex) && itemIndex < ((IList)info.Current).Count) {
@@ -83,7 +83,7 @@ partial class _CustomFormat
 	/// 
 	/// </summary>
 	[CustomFormatPriority(CustomFormatPriorities.Highest)]
-	private static void Do_Array_Formatting(CustomFormatInfo info) // TODO: Handles ExtendCustomFormat
+	private static void Do_Array_Formatting(CustomFormatInfo info)
 	{
 		// This method needs the Highest priority so that it comes before Strings.Format.Conditional.vb
 	    ICollection items = info.Current as ICollection;

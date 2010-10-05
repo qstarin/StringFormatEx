@@ -299,6 +299,15 @@ public partial class _CustomFormat
             // However, it can be overridden, in order to monitor the output and customize it.
             this.WriteEscaped(text, start, length);
         }
+
+
+
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        public virtual void WriteLiteral(string text)
+        {
+            WriteLiteral(text, 0, -1);
+        }
+
         /// <summary>
         /// Writes a string to the output and sets the Handled flag.
         /// 
@@ -306,7 +315,7 @@ public partial class _CustomFormat
         /// This is useful for filenames and such.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public virtual void WriteLiteral(string text, int start = 0, int length = -1) // TODO: Remove default param values
+        public virtual void WriteLiteral(string text, int start, int length)
         {
             this.mHandled = true;
             if (string.IsNullOrEmpty(text))
@@ -320,6 +329,10 @@ public partial class _CustomFormat
 
             this.WriteFast(text, start, length);
         }
+
+
+
+
         /// <summary>
         /// Writes a string to the output and sets the Handled flag.
         /// </summary>
@@ -352,12 +365,17 @@ public partial class _CustomFormat
         //public static string[] escapeText = new string[] { "\r\n", "\t", "{", "}", "\\" };
 
 
+
+        protected void WriteEscaped(string text)
+        {
+            WriteEscaped(text, 0, -1);
+        }
         /// <summary>
         /// Writes a string to the output and sets the Handled flag.
         /// 
         /// Effeciently escapes the "\t" and "\n" flags
         /// </summary>
-        protected void WriteEscaped(string text, int start = 0, int length = -1) // TODO: Remove default param values
+        protected void WriteEscaped(string text, int start, int length)
         {
             this.mHandled = true;
             if (string.IsNullOrEmpty(text))
@@ -380,7 +398,7 @@ public partial class _CustomFormat
                 i = text.IndexOf(escapeCharacter, i, endIndex - i - 1);
                 // Find the next "\"
                 if (i == -1)
-                    break; // TODO: might not be correct. Was : Exit Do
+                    break;
                 escIndex = escapeCharacters.IndexOf(text[i + 1]);
                 // Figure out what escape character follows the "\"
                 i += 2;
