@@ -27,9 +27,10 @@ partial class _CustomFormat
 			// If the conditional statement was False, then
 			// we will move on to the next parameters
 			while (!conditionResult) {
-				if (paramIndex == parameters.Length - 1)
-					break;
-				paramIndex += 1;
+                if (paramIndex == parameters.Length - 1) {
+                    break;
+                }
+			    paramIndex += 1;
 				if (!TryEvaluateCondition(ref parameters[paramIndex], info.Current, ref conditionResult)) {
 					// (couldn't evaluate the conditional statement, which means it's an "else" statement
 					break;
@@ -50,14 +51,16 @@ partial class _CustomFormat
 				    paramIndex = -1;
 			    }
 			    paramIndex = paramIndex + paramCount;
-			    if (paramIndex < 0)
-				    paramIndex = paramCount - 1;
+                if (paramIndex < 0) {
+                    paramIndex = paramCount - 1;
+                }
 		    } 
             else if (info.CurrentIsBoolean) {
                 // Bool: True|False
                 bool arg = (bool)info.Current;
-                if (!arg)
+                if (!arg) {
                     paramIndex = 1;
+                }
             }
 		    else if (info.CurrentIsDate) {
 			    // Date: Past|Present|Future   or   Past/Present|Future
@@ -80,14 +83,16 @@ partial class _CustomFormat
 		    else if (info.CurrentIsString) {
 			    // String: Value|NullOrEmpty
 			    var arg = (string)info.Current;
-			    if (string.IsNullOrEmpty(arg))
-			        paramIndex = 1;
+                if (string.IsNullOrEmpty(arg)) {
+                    paramIndex = 1;
+                }
 		    }
 		    else {
 			    // Object: Something|Nothing
 			    object arg = info.Current;
-			    if (arg == null)
-			        paramIndex = 1;
+                if (arg == null) {
+                    paramIndex = 1;
+                }
 		    }
 
 		}
@@ -130,7 +135,7 @@ partial class _CustomFormat
 		CaptureCollection values = m.Groups[3].Captures;
 
 	    var decimalValue = Convert.ToDecimal(value);
-		for (int i = 0; i <= andOrs.Count - 1; i++) {
+		for (int i = 0; i < andOrs.Count; i++) {
 			decimal v = decimal.Parse(values[i].Value);
 			bool exp = false;
 			switch (comps[i].Value) {
