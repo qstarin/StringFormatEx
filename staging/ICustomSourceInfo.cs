@@ -1,4 +1,8 @@
-﻿/// <summary>
+﻿using System.ComponentModel;
+
+
+
+/// <summary>
 /// Contains all the data necessary to evaluate the Item Selector.
 /// Provides the Current item, as well as the Selector.
 /// 
@@ -43,6 +47,7 @@ public interface ICustomSourceInfo
 	/// 
 	/// This is not used often, but provides "global" access to these objects.
 	/// </summary>
+	[EditorBrowsable(EditorBrowsableState.Advanced)]
 	object[] Arguments { get; }
 
     
@@ -51,5 +56,6 @@ public interface ICustomSourceInfo
 	/// Determines if the ExtendCustomSource event has been handled.
 	/// Automatically set to True when you set the Current item.
 	/// </summary>
+	[EditorBrowsable(EditorBrowsableState.Advanced)]
 	bool Handled { get; set; }
 }

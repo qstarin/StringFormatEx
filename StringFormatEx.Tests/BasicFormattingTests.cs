@@ -26,7 +26,7 @@ namespace StringFormatEx.Tests
             var expectedOutput = "Quentin is 29 years old and has 0 friends.";
 
             var actualOutput = _CustomFormat.CustomFormat(formatString, formatArgs);
-            Assert.AreEqual(actualOutput, expectedOutput);
+            Assert.AreEqual(expectedOutput, actualOutput);
         }
     }
 }

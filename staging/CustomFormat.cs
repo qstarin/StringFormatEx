@@ -19,6 +19,7 @@ public sealed partial class _CustomFormat
 
         _CustomFormat.ExtendCustomSource += _CustomFormat._GetDefaultSource;
         _CustomFormat.ExtendCustomSource += _CustomFormat.Get_Array_Source;
+        _CustomFormat.ExtendCustomSource += _CustomFormat.Get_Array_Index;
     }
 
     #region Shared Fields
@@ -170,7 +171,7 @@ public sealed partial class _CustomFormat
     }
 
     #endregion
-    
+   
 
     #region NextPlaceholder
 
@@ -182,7 +183,8 @@ public sealed partial class _CustomFormat
     /// It is faster and more direct, and does not suffer from Regex endless loops.
     /// In tests, this nearly doubles the speed vs Regex.
     /// </summary>
-    public static bool NextPlaceholder(string format, int startIndex, int endIndex, ref PlaceholderInfo placeholder) {
+    [EditorBrowsable(EditorBrowsableState.Advanced)]
+    public static bool NextPlaceholder(string format, int startIndex, int endIndex, ref PlaceholderInfo placeholder) { // TODO: Try this without the ref modifier
         placeholder = new PlaceholderInfo();
         placeholder.hasNested = false;
         placeholder.placeholderStart = -1;
@@ -277,7 +279,7 @@ public sealed partial class _CustomFormat
             }
             startIndex++;
         }
-        return false;
+        return false; // We couldn't find a full placeholder.
     }
 
     #endregion
@@ -286,6 +288,7 @@ public sealed partial class _CustomFormat
     #region ExtendCustomSource event
 
     public delegate void ExtendCustomSourceDelegate(ICustomSourceInfo info);
+    private static IDictionary<CustomFormatPriorities, IList<ExtendCustomSourceDelegate>> CustomSourceHandlers;
 
     public static void OnExtendCustomSource(ICustomSourceInfo info)
     {
@@ -301,7 +304,6 @@ public sealed partial class _CustomFormat
         }
     }
 
-    private static IDictionary<CustomFormatPriorities, IList<ExtendCustomSourceDelegate>> CustomSourceHandlers;
     public static event ExtendCustomSourceDelegate ExtendCustomSource {
         add
         {
@@ -342,6 +344,7 @@ public sealed partial class _CustomFormat
     #region ExtendCustomFormat
 
     public delegate void ExtendCustomFormatDelegate(CustomFormatInfo info);
+    static private IDictionary<CustomFormatPriorities, IList<ExtendCustomFormatDelegate>> CustomFormatHandlers;
 
     public static void OnExtendCustomFormat(CustomFormatInfo info)
     {
@@ -358,7 +361,6 @@ public sealed partial class _CustomFormat
     }
 
 
-    static private IDictionary<CustomFormatPriorities, IList<ExtendCustomFormatDelegate>> CustomFormatHandlers;
 
     /// <summary>
     /// An event that allows custom formatting to occur.
@@ -530,11 +532,21 @@ public sealed partial class _CustomFormat
     }
 
     #endregion
-
+ 
 
     #region ErrorActions
 
-    public enum ErrorActions { ThrowError, OutputErrorInResult, Ignore }
+    public enum ErrorActions
+    {
+        /// <summary>Throws an exception.  This is only recommended for debugging, so that formatting errors can be easily found.</summary>
+        ThrowError, 
+        
+        /// <summary>Includes an error message in the output</summary>
+        OutputErrorInResult, 
+        
+        /// <summary>Ignores errors and tries to output the data anyway</summary>
+        Ignore
+    }
 
 #if DEBUG
     //  Makes it easier to spot errors while debugging.
@@ -619,7 +631,6 @@ public sealed partial class _CustomFormat
                           ("The error occurs at position {2} of the following format string:\\n" + "{3}"))), selector,
                         errorMessage, placeholder.placeholderStart, format);
                 throw new ArgumentException(message, invalidFormat, ex);
-                break;
             case ErrorActions.OutputErrorInResult:
                 //  Let's put the placeholder back,
                 //  along with the error.

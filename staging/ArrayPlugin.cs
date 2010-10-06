@@ -117,8 +117,9 @@ partial class _CustomFormat
 
 
 	    int itemCount = -1;
-		if (lastSpacer != null)
-			itemCount = items.Count;
+        if (lastSpacer != null) {
+            itemCount = items.Count;
+        }
 
 		int oldCollectionIndex = CollectionIndex;
 		// In case we have nested arrays, we might need to restore the CollectionIndex
@@ -130,10 +131,12 @@ partial class _CustomFormat
 			// If it isn't the first item, then write the spacer:
 			if (CollectionIndex > 0) {
 				// Write either the spacer or lastSpacer:
-				if (itemCount == -1 || CollectionIndex < itemCount - 1)
-					info.Write(spacer);
-				else
-					info.Write(lastSpacer);
+                if (itemCount == -1 || CollectionIndex < itemCount - 1) {
+                    info.Write(spacer);
+                }
+                else {
+                    info.Write(lastSpacer);
+                }
 			}
 
 			// Write the format for this item:

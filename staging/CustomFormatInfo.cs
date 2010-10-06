@@ -49,6 +49,7 @@ public partial class _CustomFormat
         /// 
         /// Updates the Selector for use in the ExtendCustomSource event.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
         public void SetSelector(string newSelector, int newSelectorIndex)
         {
             this.mSelector = newSelector;
@@ -61,6 +62,7 @@ public partial class _CustomFormat
         /// <summary>
         /// This property is hidden, because it is only used as an argument to CustomSourceEventArgs.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public string Selector
         {
             get { return mSelector; }
@@ -80,6 +82,7 @@ public partial class _CustomFormat
         /// An array of all the original arguments passed to the CustomFormat function.
         /// This is not used often, but provides "global" access to these objects.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
         public object[] Arguments
         {
             get { return mArguments; }
@@ -112,6 +115,7 @@ public partial class _CustomFormat
         /// 
         /// Updates the Format property for use in a ExtendCustomFormat event.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
         public void SetFormat(string newFormat, bool newHasNested)
         {
             this.mFormat = newFormat;
@@ -155,6 +159,7 @@ public partial class _CustomFormat
         /// 
         /// However, this item is usually Nothing; it is only implemented because the original String.Format implements it, and I wanted to be compatible.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
         private readonly IFormatProvider mProvider;
         public IFormatProvider Provider
         {
@@ -164,6 +169,7 @@ public partial class _CustomFormat
         #endregion
 
         #region "      Helper properties - cache common calls to help determine the Current type "
+
         protected IDictionary<string, object> cache = new Dictionary<string, object>();
         /// <summary>
         /// Returns the Current item's type.
@@ -175,10 +181,12 @@ public partial class _CustomFormat
             get
             {
                 const string cacheKey = "itemType";
-                if (this.mCurrent == null)
+                if (this.mCurrent == null) {
                     return null;
-                if (!cache.ContainsKey(cacheKey))
+                }
+                if (!cache.ContainsKey(cacheKey)) {
                     cache.Add(cacheKey, this.mCurrent.GetType());
+                }
                 return (Type)cache[cacheKey]; // TODO: Remove cast
             }
         }
@@ -190,8 +198,9 @@ public partial class _CustomFormat
             get
             {
                 const string cacheKey = "isNumber";
-                if (!cache.ContainsKey(cacheKey))
+                if (!cache.ContainsKey(cacheKey)) {
                     cache.Add(cacheKey, mCurrent is int || mCurrent is long || mCurrent is short || mCurrent is float || mCurrent is double || mCurrent is decimal || (mCurrent != null && this.CurrentType.IsEnum));
+                }
                 return (bool)cache[cacheKey]; // TODO: Remove cast
             }
         }
@@ -203,8 +212,9 @@ public partial class _CustomFormat
             get
             {
                 const string cacheKey = "isFloat";
-                if (!cache.ContainsKey(cacheKey))
+                if (!cache.ContainsKey(cacheKey)) {
                     cache.Add(cacheKey, mCurrent is float || mCurrent is double || mCurrent is decimal);
+                }
                 return (bool)cache[cacheKey]; // TODO: remove cast
             }
         }
@@ -216,8 +226,9 @@ public partial class _CustomFormat
             get
             {
                 const string cacheKey = "isDate";
-                if (!cache.ContainsKey(cacheKey))
+                if (!cache.ContainsKey(cacheKey)) {
                     cache.Add(cacheKey, mCurrent is System.DateTime);
+                }
                 return (bool)cache[cacheKey]; // TODO: remove cast
             }
         }
@@ -229,8 +240,9 @@ public partial class _CustomFormat
             get
             {
                 const string cacheKey = "isBoolean";
-                if (!cache.ContainsKey(cacheKey))
+                if (!cache.ContainsKey(cacheKey)) {
                     cache.Add(cacheKey, mCurrent is bool);
+                }
                 return (bool)cache[cacheKey]; // TODO: remove cast
             }
         }
@@ -242,8 +254,9 @@ public partial class _CustomFormat
             get
             {
                 const string cacheKey = "isString";
-                if (!cache.ContainsKey(cacheKey))
+                if (!cache.ContainsKey(cacheKey)) {
                     cache.Add(cacheKey, mCurrent is string);
+                }
                 return (bool)cache[cacheKey]; // TODO: remove cast
             }
         }
@@ -255,8 +268,9 @@ public partial class _CustomFormat
             get
             {
                 const string cacheKey = "isTimeSpan";
-                if (!cache.ContainsKey(cacheKey))
+                if (!cache.ContainsKey(cacheKey)) {
                     cache.Add(cacheKey, mCurrent is TimeSpan);
+                }
                 return (bool)cache[cacheKey]; // TODO: remove cast
             }
         }
@@ -293,7 +307,7 @@ public partial class _CustomFormat
         /// 
         /// As an added bonus, automatically escapes the "\t" and "\n" flags
         /// </summary>
-        public virtual void Write(string text, int start = 0, int length = -1)
+        public virtual void Write(string text, int start = 0, int length = -1) // TODO: Replace optional parameters with function overload
         {
             // By default, this doesn't do anything special.
             // However, it can be overridden, in order to monitor the output and customize it.
@@ -318,14 +332,18 @@ public partial class _CustomFormat
         public virtual void WriteLiteral(string text, int start, int length)
         {
             this.mHandled = true;
-            if (string.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(text)) {
                 return;
-            if (start < 0 || start > text.Length || start + length > text.Length)
+            }
+            if (start < 0 || start > text.Length || start + length > text.Length) {
                 throw new ArgumentOutOfRangeException("start", "Start or Length is out of range");
-            if (length < 0)
+            }
+            if (length < 0) {
                 length = text.Length - start;
-            if (length == 0)
+            }
+            if (length == 0) {
                 return;
+            }
 
             this.WriteFast(text, start, length);
         }
@@ -378,14 +396,18 @@ public partial class _CustomFormat
         protected void WriteEscaped(string text, int start, int length)
         {
             this.mHandled = true;
-            if (string.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(text)) {
                 return;
-            if (start < 0 || start > text.Length || start + length > text.Length)
+            }
+            if (start < 0 || start > text.Length || start + length > text.Length) {
                 throw new ArgumentOutOfRangeException("start", "Start or Length is out of range");
-            if (length < 0)
+            }
+            if (length < 0) {
                 length = text.Length - start;
-            if (length == 0)
+            }
+            if (length == 0) {
                 return;
+            }
 
             // Try to escape all the \n, \t, \{, \}, and \\ characters:
             // (all these values are contained in _CustomFormat.escapeCharacters)
@@ -397,14 +419,16 @@ public partial class _CustomFormat
             while (i < endIndex) {
                 i = text.IndexOf(escapeCharacter, i, endIndex - i - 1);
                 // Find the next "\"
-                if (i == -1)
+                if (i == -1) {
                     break;
+                }
                 escIndex = escapeCharacters.IndexOf(text[i + 1]);
                 // Figure out what escape character follows the "\"
                 i += 2;
                 // Skip both characters
-                if (escIndex == -1)
+                if (escIndex == -1) {
                     continue;
+                }
                 // The escape character wasn't found.
                 WriteFast(text, lastIndex, (i - 2) - lastIndex);
                 // Write the text between escapes
@@ -423,14 +447,16 @@ public partial class _CustomFormat
         /// </summary>
         protected void WriteFast(string text, int start, int length)
         {
-            if (length == 0)
+            if (length == 0) {
                 return;
+            }
             // Don't need to write anything
 
             if (start == 0 && length == text.Length) {
                 // Write the whole string; this method doesn't need to be optimized.
                 this.Output.Write(text);
-            } else if (this.OutputSB != null) {
+            } 
+            else if (this.OutputSB != null) {
                 // StringWriter Performance Notes:
                 //
                 // StringBuilder.Append(String, index, length) is FASTER than any TextWriter functions, because
