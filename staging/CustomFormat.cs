@@ -165,9 +165,9 @@ public sealed partial class _CustomFormat
                 //  Handle errors:
                 OnInvalidFormat(format, info, placeholder, ex);
             }
-            //  Write the substring between the last bracket and the end of the string:
-            info.WriteRegularText(format, lastAppendedIndex, (format.Length - lastAppendedIndex));
         }
+        //  Write the substring between the last bracket and the end of the string:
+        info.WriteRegularText(format, lastAppendedIndex, (format.Length - lastAppendedIndex));
     }
 
     #endregion
@@ -521,13 +521,13 @@ public sealed partial class _CustomFormat
                 info.Write(formatter.Format(info.Format, info.Current, info.Provider));
                 return;
             }
-            //  Now try to format the object, using its own built-in formatting if possible:
-            if (info.Current.GetType() is IFormattable) {
-                info.Write(((IFormattable)info.Current).ToString(info.Format, info.Provider));
-            }
-            else {
-                info.Write(info.Current.ToString());
-            }
+        }
+        //  Now try to format the object, using its own built-in formatting if possible:
+        if (info.Current.GetType() is IFormattable) {
+            info.Write(((IFormattable)info.Current).ToString(info.Format, info.Provider));
+        }
+        else {
+            info.Write(info.Current.ToString());
         }
     }
 
