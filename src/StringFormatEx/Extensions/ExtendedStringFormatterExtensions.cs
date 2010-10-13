@@ -11,48 +11,45 @@ namespace StringFormatEx.Extensions
     {
         public static string FormatEx(this string format, IFormatProvider formatProvider, params object[] args)
         {
-             StringWriter output = new StringWriter(new StringBuilder((format.Length * 2)));
-            //  Guessing a length can help performance a little.
-            ExtendedStringFormatter.Default.FormatExInternal(new CustomFormatInfo(ExtendedStringFormatter.Default, output, formatProvider, format, args));
-            return output.ToString();
+            return ExtendedStringFormatter.Default.FormatEx(formatProvider, format, args);
         }
 
         public static string FormatEx(this string format, params object[] args)
         {
-            return FormatEx(format, (IFormatProvider)null, format, args);
+            return ExtendedStringFormatter.Default.FormatEx(format, args);
         }
 
 
         public static void FormatEx(this string format, Stream output, IFormatProvider formatProvider, params object[] args)
         {
-           ExtendedStringFormatter.Default.FormatExInternal(new CustomFormatInfo(ExtendedStringFormatter.Default, new StreamWriter(output), formatProvider, format, args));
+           ExtendedStringFormatter.Default.FormatEx(output, formatProvider, format, args);
         }
         
         public static void FormatEx(this string format, Stream output, params object[] args)
         {
-            FormatEx(format, output, null, format, args);
+           ExtendedStringFormatter.Default.FormatEx(output, format, args);
         }
 
 
         public static void FormatEx(this string format, TextWriter output, IFormatProvider formatProvider, params object[] args)
         {
-           ExtendedStringFormatter.Default.FormatExInternal(new CustomFormatInfo(ExtendedStringFormatter.Default, output, formatProvider, format, args));
+           ExtendedStringFormatter.Default.FormatEx(output, formatProvider, format, args);
         }
         
         public static void FormatEx(this string format, TextWriter output, params object[] args)
         {
-            FormatEx(format, output, null, format, args);
+           ExtendedStringFormatter.Default.FormatEx(output, format, args);
         }
 
 
         public static void FormatEx(this string format, StringBuilder output, IFormatProvider formatProvider, params object[] args)
         {
-           ExtendedStringFormatter.Default.FormatExInternal(new CustomFormatInfo(ExtendedStringFormatter.Default, new StringWriter(output), formatProvider, format, args));
+           ExtendedStringFormatter.Default.FormatEx(output, formatProvider, format, args);
         }
         
         public static void FormatEx(this string format, StringBuilder output, params object[] args)
         {
-            FormatEx(format, output, null, format, args);
+           ExtendedStringFormatter.Default.FormatEx(output, format, args);
         }
 
     }
